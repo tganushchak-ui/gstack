@@ -1,0 +1,4 @@
+{
+  "name": "gstack",
+  "install": "bash .cursor/install.sh"
+}
