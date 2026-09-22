@@ -18,7 +18,9 @@ bin/gstack-global-discover*
 .kiro/
 .opencode/
 .slate/
-.cursor/
+.cursor/*
+!.cursor/environment.json
+!.cursor/install.sh
 .openclaw/
 .hermes/
 .gbrain/
