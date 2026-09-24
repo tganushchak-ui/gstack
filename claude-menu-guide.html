@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Меню Claude — навчальний посібник</title>
+<style>
+  :root {
+    --bg: #f5f4ef;
+    --surface: #ffffff;
+    --surface-2: #efede6;
+    --text: #1f1e1b;
+    --muted: #6b6860;
+    --border: #dedbd2;
+    --accent: #c15f3c;
+    --accent-soft: #f6e3da;
+    --ok: #2f7d4f;
+    --ok-soft: #dcefe3;
+    --warn: #8a5a00;
+    --warn-soft: #fbeccb;
+    --bad: #b3261e;
+    --bad-soft: #f8dcd9;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b19;
+      --surface: #262522;
+      --surface-2: #2f2d2a;
+      --text: #ecebe6;
+      --muted: #a29f96;
+      --border: #3c3a36;
+      --accent: #e0896a;
+      --accent-soft: #3d2a22;
+      --ok: #6cc38f;
+      --ok-soft: #1f3528;
+      --warn: #f0c060;
+      --warn-soft: #3a2f16;
+      --bad: #f08a80;
+      --bad-soft: #3d2220;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b19;
+    --surface: #262522;
+    --surface-2: #2f2d2a;
+    --text: #ecebe6;
+    --muted: #a29f96;
+    --border: #3c3a36;
+    --accent: #e0896a;
+    --accent-soft: #3d2a22;
+    --ok: #6cc38f;
+    --ok-soft: #1f3528;
+    --warn: #f0c060;
+    --warn-soft: #3a2f16;
+    --bad: #f08a80;
+    --bad-soft: #3d2220;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px 64px; }
+  a { color: var(--accent); }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* ---------- header ---------- */
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+  header.top .wrap { padding-top: 12px; padding-bottom: 12px; }
+  .title-row { display: flex; align-items: center; gap: 12px; }
+  .title-row h1 { font-size: 20px; margin: 0; flex: 1; line-height: 1.25; }
+  .icon-btn {
+    border: 1px solid var(--border); background: var(--surface);
+    border-radius: 10px; padding: 6px 10px; font-size: 14px; white-space: nowrap;
+  }
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+  .bar { flex: 1; height: 8px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+  .tabs { display: flex; gap: 6px; margin-top: 10px; }
+  .tabs button {
+    flex: 1; border: 1px solid var(--border); background: var(--surface);
+    padding: 8px 6px; border-radius: 10px; font-size: 15px;
+  }
+  .tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+  /* ---------- intro / toc ---------- */
+  .intro { margin: 20px 0 8px; color: var(--muted); font-size: 15px; }
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin: 16px 0; box-shadow: var(--shadow);
+  }
+  .panel h2 { font-size: 17px; margin: 0 0 8px; }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc li { margin: 4px 0; }
+  .glossary dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: 15px; }
+  .glossary dt { font-weight: 600; }
+  .glossary dd { margin: 0; color: var(--muted); }
+  details.glossary summary { cursor: pointer; font-weight: 600; font-size: 17px; }
+  details.glossary[open] summary { margin-bottom: 10px; }
+
+  .search {
+    width: 100%; padding: 12px 14px; font-size: 16px;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface); color: var(--text);
+  }
+  .search:focus, .tabs button:focus-visible, .icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .filter-row { display: flex; gap: 10px; align-items: center; margin-top: 8px; font-size: 14px; color: var(--muted); flex-wrap: wrap; }
+
+  /* ---------- sections & items ---------- */
+  section.group { margin-top: 28px; scroll-margin-top: 150px; }
+  section.group > h2 { font-size: 21px; margin: 0 0 4px; }
+  section.group > p.sub { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+
+  article.item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: var(--shadow);
+    scroll-margin-top: 150px;
+  }
+  article.item.learned { border-color: var(--ok); }
+  .item-head { display: flex; gap: 12px; align-items: flex-start; }
+  .item-head .names { flex: 1; min-width: 0; }
+  .en { font-size: 24px; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+  .uk { font-size: 15px; color: var(--muted); margin-top: 2px; }
+  .learn {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 14px;
+    border: 1px solid var(--border); border-radius: 99px; padding: 5px 10px;
+    background: var(--surface-2); white-space: nowrap; user-select: none; cursor: pointer;
+  }
+  .learn input { width: 18px; height: 18px; margin: 0; accent-color: var(--ok); }
+  .learned .learn { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+
+  .warn {
+    margin-top: 10px; padding: 8px 12px; border-radius: 10px;
+    background: var(--warn-soft); color: var(--warn); font-size: 14px;
+  }
+  .warn b { white-space: nowrap; }
+  .block { margin-top: 12px; }
+  .block h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  .block p { margin: 0; }
+  .block ul { margin: 0; padding-left: 20px; }
+  .block li { margin: 2px 0; }
+  .example {
+    display: flex; gap: 8px; align-items: flex-start;
+    background: var(--accent-soft); border-radius: 10px; padding: 10px 12px;
+  }
+  .example q { flex: 1; quotes: none; font-style: italic; overflow-wrap: anywhere; }
+  .copy {
+    border: 1px solid var(--border); background: var(--surface);
+    border-radius: 8px; padding: 4px 10px; font-size: 13px; white-space: nowrap;
+  }
+  .copy.done { background: var(--ok-soft); color: var(--ok); border-color: var(--ok); }
+  .sources { margin-top: 10px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .sources a { color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 30px 0; }
+  mark { background: var(--warn-soft); color: inherit; border-radius: 3px; }
+
+  /* ---------- flashcards ---------- */
+  .card-stage { margin-top: 20px; }
+  .flash {
+    min-height: 300px; display: flex; flex-direction: column; justify-content: center;
+    text-align: center; cursor: pointer; user-select: none;
+  }
+  .flash .en { font-size: 34px; }
+  .flash .hint { color: var(--muted); font-size: 14px; margin-top: 14px; }
+  .flash .back { text-align: left; margin-top: 16px; }
+  .flash .back .uk { font-size: 18px; text-align: center; margin-bottom: 8px; }
+  .card-nav { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+  .card-nav button {
+    flex: 1; border: 1px solid var(--border); background: var(--surface);
+    border-radius: 10px; padding: 10px;
+  }
+  .card-nav .count { flex: 0 0 auto; color: var(--muted); font-size: 14px; padding: 0 6px; }
+
+  /* ---------- quiz ---------- */
+  .quiz-q .en { font-size: 28px; margin: 6px 0 2px; }
+  .quiz-meta { color: var(--muted); font-size: 14px; }
+  .options { display: grid; gap: 10px; margin-top: 16px; }
+  .options button {
+    text-align: left; border: 1px solid var(--border); background: var(--surface-2);
+    border-radius: 12px; padding: 12px 14px; font-size: 16px;
+  }
+  .options button.right { background: var(--ok-soft); border-color: var(--ok); }
+  .options button.wrong { background: var(--bad-soft); border-color: var(--bad); }
+  .options button:disabled { cursor: default; }
+  .feedback { margin-top: 12px; font-size: 15px; }
+  .primary {
+    margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 12px;
+    background: var(--text); color: var(--bg); font-weight: 600;
+  }
+  .score { font-size: 44px; font-weight: 700; text-align: center; margin: 10px 0; }
+  .review li { margin: 6px 0; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 560px) {
+    .title-row h1 { font-size: 17px; }
+    .en { font-size: 21px; }
+    .flash .en { font-size: 28px; }
+    .item-head { flex-direction: column; gap: 8px; }
+    .glossary dl { grid-template-columns: 1fr; gap: 0; }
+    .glossary dd { margin-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="title-row">
+      <h1>Меню Claude: навчальний посібник</h1>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Змінити тему">🌓 Тема</button>
+    </div>
+    <div class="progress-row">
+      <span id="progressText">Вивчено 0 з 0</span>
+      <div class="bar" aria-hidden="true"><div id="progressBar"></div></div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-mode="list" aria-selected="true">📖 Список</button>
+      <button type="button" role="tab" data-mode="cards" aria-selected="false">🃏 Картки</button>
+      <button type="button" role="tab" data-mode="quiz" aria-selected="false">✅ Тест</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= LIST MODE ================= -->
+  <div id="mode-list">
+    <p class="intro">
+      Тут зібрано пункти меню мобільного застосунку Claude в тому вигляді, як вони написані на вашому екрані.
+      Для кожного пункту є переклад, пояснення, бізнес-приклад і готовий запит, який можна скопіювати.
+      Жовта плашка <b>⚠ перевірити</b> означає, що в офіційній документації не знайшлося точного опису цього пункту.
+    </p>
+
+    <nav class="panel toc" aria-label="Зміст">
+      <h2>Зміст</h2>
+      <ol id="toc"></ol>
+    </nav>
+
+    <details class="panel glossary">
+      <summary>Словничок термінів</summary>
+      <dl id="glossary"></dl>
+    </details>
+
+    <input class="search" id="search" type="search"
+           placeholder="Пошук англійською або українською…" autocomplete="off" aria-label="Пошук пунктів">
+    <div class="filter-row">
+      <label><input type="checkbox" id="hideLearned"> Сховати вивчені</label>
+      <span id="searchCount"></span>
+    </div>
+
+    <div id="sections"></div>
+    <p class="empty" id="noResults" hidden>Нічого не знайдено. Спробуйте інше слово.</p>
+  </div>
+
+  <!-- ================= CARDS MODE ================= -->
+  <div id="mode-cards" hidden>
+    <p class="intro">Подивіться на англійську назву і пригадайте, що вона означає. Натисніть на картку, щоб перевірити себе.</p>
+    <div class="filter-row">
+      <label><input type="checkbox" id="cardsOnlyNew"> Тільки ще не вивчені</label>
+    </div>
+    <div class="card-stage">
+      <div class="panel flash" id="flash" tabindex="0" role="button" aria-label="Перевернути картку"></div>
+      <div class="card-nav">
+        <button type="button" id="cardPrev">← Назад</button>
+        <span class="count" id="cardCount"></span>
+        <button type="button" id="cardNext">Далі →</button>
+      </div>
+      <div class="card-nav">
+        <button type="button" id="cardShuffle">🔀 Перемішати</button>
+        <button type="button" id="cardLearn">✓ Я це знаю</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= QUIZ MODE ================= -->
+  <div id="mode-quiz" hidden>
+    <p class="intro">10 випадкових питань. Оберіть, що робить функція.</p>
+    <div class="panel" id="quiz"></div>
+  </div>
+
+</main>
+
+<script>
+/* =====================================================================
+   ДАНІ. Щоб додати новий пункт меню, скопіюйте один об'єкт у масиві
+   ITEMS і змініть поля. Поле "section" має збігатися з "id" у SECTIONS.
+
+   Поля пункту:
+     id       унікальний короткий ідентифікатор латиницею
+     section  до якого розділу належить
+     en       назва англійською, як в інтерфейсі
+     uk       переклад українською
+     short    дуже коротко, що робить (використовується в тесті)
+     what     що це робить (1–2 речення)
+     when     коли використовувати (бізнес-ситуація)
+     tips     масив із 1–3 порад
+     example  запит, який можна скопіювати
+     verify   (необов'язково) що саме треба перевірити — з'явиться плашка ⚠
+     sources  масив посилань на документацію
+   ===================================================================== */
+
+const SECTIONS = [
+  { id: "sidebar-top",  title: "Бічна панель: верх",           sub: "Заголовок «Claude» і кнопка пошуку" },
+  { id: "sidebar-nav",  title: "Бічна панель: головне меню",    sub: "П'ять основних розділів застосунку" },
+  { id: "sidebar-lists",title: "Бічна панель: списки",          sub: "Закріплені й нещодавні розмови" },
+  { id: "sidebar-bottom",title: "Бічна панель: низ",            sub: "Профіль і кнопка нової сесії" },
+  { id: "code-screen",  title: "Екран Code",                    sub: "Те, що видно праворуч, коли відкрито розділ Code" }
+];
+
+const GLOSSARY = [
+  ["Project", "проєкт: окремий робочий простір із власними файлами, інструкціями й розмовами"],
+  ["Session", "сесія: одна окрема робота або розмова з Claude Code"],
+  ["Artifact", "артефакт: готовий результат, який створив Claude (документ, таблиця, презентація, міні-програма)"],
+  ["Claude Code", "версія Claude, яка вміє писати й запускати програмний код"],
+  ["Cloud session", "хмарна сесія: Claude Code працює на серверах Anthropic, а не на вашому комп'ютері"],
+  ["Repository", "репозиторій: папка з кодом проєкту, яка зберігається на сайті GitHub"],
+  ["GitHub", "сайт для зберігання коду та спільної роботи над ним"],
+  ["Branch", "гілка: окрема копія коду в репозиторії, де можна вносити зміни, не чіпаючи основну версію"],
+  ["Connector", "конектор: підключення Claude до іншого сервісу, наприклад Gmail, Google Drive, Slack"],
+  ["MCP", "Model Context Protocol, стандарт, через який Claude під'єднується до зовнішніх програм і даних; конектори працюють саме через нього"],
+  ["Skill", "навичка: збережена інструкція, яка вчить Claude виконувати певне завдання по-вашому"],
+  ["Remote Control", "віддалене керування: ви керуєте з телефона сесією Claude Code, яка працює на вашому комп'ютері"],
+  ["Claude Desktop", "програма Claude для комп'ютера (macOS, Windows)"]
+];
+
+const DOCS = {
+  projects:   "https://support.claude.com/en/articles/9517075-what-are-projects",
+  codeProj:   "https://code.claude.com/docs/en/claude-projects",
+  artifacts:  "https://support.claude.com/en/articles/9487310-what-are-artifacts-and-how-do-i-use-them",
+  scheduled:  "https://support.claude.com/en/articles/13854387-schedule-recurring-tasks-in-claude-cowork",
+  dispatch:   "https://support.claude.com/en/articles/13947068-assign-tasks-from-anywhere-in-claude-cowork",
+  cloud:      "https://code.claude.com/docs/en/claude-code-on-the-web",
+  mobile:     "https://code.claude.com/docs/en/mobile",
+  remote:     "https://code.claude.com/docs/en/remote-control",
+  chatSearch: "https://support.claude.com/en/articles/11817273-use-claude-s-chat-search-and-memory-to-build-on-previous-context",
+  rename:     "https://support.claude.com/en/articles/8230524-delete-or-rename-a-conversation",
+  oneClaude:  "https://support.claude.com/en/articles/16761823-claude-cowork-and-chat-are-one-claude"
+};
+
+const ITEMS = [
+  /* ---------------- Бічна панель: верх ---------------- */
+  {
+    id: "search-chats", section: "sidebar-top",
+    en: "🔍 Search", uk: "Пошук (значок лупи біля заголовка «Claude»)",
+    short: "Шукає серед ваших минулих розмов",
+    what: "Допомагає знайти потрібну розмову серед ваших чатів. У документації сказано, що пошук охоплює ваші чати й нові розмови, а старі завдання Cowork можна знайти за назвою в Recents.",
+    when: "Минулого місяця ви обговорювали з Claude ціну на УФ-стабілізатор для поліетилену, а тепер постачальник надіслав нову пропозицію. Пошук швидко знайде ту розмову, щоб ви могли порівняти.",
+    tips: [
+      "Шукайте за унікальним словом: назвою продукту, постачальника або номером фактури.",
+      "Давайте чатам зрозумілі назви (Rename), тоді їх буде легше знайти.",
+      "На платних планах можна просто попросити Claude в новому чаті: «знайди, що ми вирішили про…». Це функція «Search and reference chats» у Settings → Memory."
+    ],
+    example: "Знайди в моїх минулих чатах, яку ціну за кг УФ-стабілізатора ми погодили з постачальником, і нагадай умови доставки.",
+    verify: "На екрані тільки значок без підпису. Уточніть, чи шукає він лише за назвами чатів, чи й за текстом повідомлень на телефоні.",
+    sources: [DOCS.chatSearch]
+  },
+
+  /* ---------------- Бічна панель: головне меню ---------------- */
+  {
+    id: "projects", section: "sidebar-nav",
+    en: "Projects", uk: "Проєкти",
+    short: "Робочі простори з власними файлами, інструкціями й чатами",
+    what: "Project (проєкт: окремий робочий простір) зберігає разом файли, інструкції та розмови на одну тему. Claude бачить ці файли в кожному чаті всередині проєкту.",
+    when: "Створіть проєкт «Постачальники добавок» і завантажте туди прайс-листи, технічні картки TDS/MSDS і шаблони листів. Кожен новий чат у проєкті вже знатиме ваші ціни та продукти.",
+    tips: [
+      "Один проєкт на одну тему: окремо «Постачальники», окремо «Кошториси», окремо «Бухгалтерія».",
+      "Напишіть інструкції проєкту, наприклад: «Відповідай польською, ввічливо, ціни вказуй у PLN без ПДВ».",
+      "На безкоштовному плані можна мати до 5 проєктів, на платних кількість не обмежена."
+    ],
+    example: "Використовуючи прайс-листи в цьому проєкті, порівняй ціни на антиоксиданти від усіх постачальників і склади таблицю від найдешевшого.",
+    verify: "Існує два види проєктів: звичайні проєкти чату і нові проєкти Claude Code (бета), де «проєкт — це одна розмова», яка запускає паралельні завдання. Уточніть, який саме відкривається з цього пункту у вашому застосунку.",
+    sources: [DOCS.projects, DOCS.codeProj, DOCS.oneClaude]
+  },
+  {
+    id: "code", section: "sidebar-nav",
+    en: "Code", uk: "Код",
+    short: "Запускає Claude Code в хмарі для роботи з кодом",
+    what: "Відкриває Claude Code (версію Claude, яка пише й запускає код). З телефона можна запускати cloud sessions (хмарні сесії: Claude працює на серверах, а не на вашому пристрої), стежити за ними й керувати сесією на своєму комп'ютері.",
+    when: "Вам потрібна проста сторінка-калькулятор для кошторисів або скрипт, що перетворює Excel-прайс у зручну таблицю. Опишіть завдання з телефона, а результат перегляньте пізніше, навіть якщо телефон вимкнений.",
+    tips: [
+      "Для хмарних сесій потрібен GitHub (сайт для зберігання коду) і repository (репозиторій: папка з кодом). Спочатку підключіть GitHub.",
+      "Описуйте завдання конкретно: що має бути на вході, що на виході, приклад даних.",
+      "Хмарні сесії доступні на планах Pro, Max, Team і Enterprise."
+    ],
+    example: "Створи HTML-калькулятор кошторису: кількість кг добавки × ціна за кг + доставка, з підсумком у PLN і з ПДВ 23%.",
+    sources: [DOCS.mobile, DOCS.cloud]
+  },
+  {
+    id: "artifacts", section: "sidebar-nav",
+    en: "Artifacts", uk: "Артефакти",
+    short: "Показує все, що Claude створив для вас: документи, таблиці, презентації",
+    what: "Artifact (артефакт) — це те, що Claude зробив для вас і що можна показати іншим: документ, презентація, дашборд, інтерактивний інструмент. У цьому розділі всі артефакти зібрані в одному місці, тут же можна почати новий із шаблону.",
+    when: "Ви попросили Claude зробити таблицю порівняння трьох пропозицій постачальників ПВХ-стабілізаторів. Через тиждень її можна відкрити тут, не шукаючи чат, у якому вона з'явилася.",
+    tips: [
+      "Артефакти спочатку приватні. Поділитися можна через посилання.",
+      "Документи можна експортувати у Word/PDF, презентації у PowerPoint/PDF.",
+      "Змінюйте артефакт розмовою: «додай колонку з терміном доставки»."
+    ],
+    example: "Зроби артефакт-таблицю порівняння трьох пропозицій постачальників ПВХ-стабілізаторів: ціна за кг, мінімальна партія, термін доставки, умови оплати.",
+    verify: "У довідці сказано, що вкладки Artifacts поки немає на мобільному, але на вашому скриншоті вона є. Ймовірно, це нове оновлення. Уточніть, що саме відкривається на телефоні.",
+    sources: [DOCS.artifacts]
+  },
+  {
+    id: "scheduled", section: "sidebar-nav",
+    en: "Scheduled", uk: "Заплановані",
+    short: "Завдання, які Claude виконує автоматично за розкладом",
+    what: "Тут зібрані завдання, які Claude виконує сам за розкладом: щогодини, щодня, щотижня, у робочі дні або вручну. Вони працюють у хмарі, навіть коли комп'ютер спить.",
+    when: "Щопонеділка вранці Claude переглядає пошту за минулий тиждень і складає список нових пропозицій від постачальників з цінами. Для доступу до пошти потрібен connector (конектор: підключення до Gmail чи Outlook).",
+    tips: [
+      "Опишіть звичайними словами, що робити і як часто: «Щопонеділка о 9:00…».",
+      "У цьому розділі можна переглянути минулі запуски, змінити інструкцію, призупинити або видалити завдання.",
+      "Доступно лише на платних планах: Pro, Max, Team, Enterprise."
+    ],
+    example: "Щопонеділка о 8:00 переглядай мою пошту за минулий тиждень і склади список листів від постачальників: хто, який продукт, ціна, термін відповіді.",
+    sources: [DOCS.scheduled]
+  },
+  {
+    id: "dispatch", section: "sidebar-nav",
+    en: "Dispatch", uk: "Доручення (дослівно «відправлення»)",
+    short: "Даєте завдання з телефона, а Claude виконує його на вашому комп'ютері",
+    what: "Одна постійна розмова з Claude, куди ви пишете з телефона, а Claude виконує завдання на вашому комп'ютері: працює з файлами, програмами, конекторами. Claude сам вирішує, як виконати завдання.",
+    when: "Ви на складі або в дорозі, а потрібна інформація з Excel-файлу на офісному комп'ютері. Пишете в Dispatch, Claude відкриває файл і надсилає відповідь.",
+    tips: [
+      "Комп'ютер має бути ввімкнений і не спати, а програма Claude Desktop — відкрита.",
+      "Налаштування: Dispatch → Get started → увімкнути доступ до файлів → Finish setup.",
+      "Доступно лише на планах Pro і Max (бета), не на Team чи Enterprise."
+    ],
+    example: "Знайди на комп'ютері Excel-файл із залишками складу за вересень і напиши, яких добавок залишилося менше 100 кг.",
+    sources: [DOCS.dispatch, DOCS.mobile]
+  },
+
+  /* ---------------- Бічна панель: списки ---------------- */
+  {
+    id: "pinned", section: "sidebar-lists",
+    en: "Pinned", uk: "Закріплені",
+    short: "Список закріплених елементів, які завжди вгорі",
+    what: "Заголовок списку елементів, які ви закріпили, щоб вони завжди були під рукою вгорі бічної панелі. На вашому скриншоті біля закріплених пунктів стоїть той самий значок, що й у Projects, тобто це закріплені проєкти.",
+    when: "Проєкти, з якими ви працюєте щодня (наприклад, «Постачальники» і «Кошториси»), закріпіть, щоб не гортати довгий список.",
+    tips: [
+      "Закріплюйте лише 3–5 найважливіших проєктів, інакше список втратить сенс.",
+      "Відкріплюйте проєкти, коли робота над ними завершилася."
+    ],
+    example: "Нагадай коротко, які домовленості з постачальником ми зафіксували в цьому проєкті минулого тижня.",
+    verify: "В офіційній документації не знайшлося опису розділу Pinned. Уточніть, як закріпити елемент на телефоні (довге натискання чи меню «⋯») і чи можна закріплювати окремі чати, а не лише проєкти.",
+    sources: []
+  },
+  {
+    id: "recents", section: "sidebar-lists",
+    en: "Recents", uk: "Нещодавні",
+    short: "Список ваших останніх розмов і завдань",
+    what: "Список останніх розмов. За документацією, тут разом зберігаються і швидкі питання, і довші завдання.",
+    when: "Учора ви почали рахувати кошторис для клієнта, а сьогодні постачальник змінив ціну доставки. Відкрийте цей чат у Recents і продовжуйте з того самого місця.",
+    tips: [
+      "Нова тема — новий чат. Так Claude не плутає контексти.",
+      "Перейменовуйте важливі чати (Rename) і видаляйте непотрібні (Delete) через меню «⋯».",
+      "Для постійних тем краще створити Project, а не шукати чати в Recents."
+    ],
+    example: "Продовжимо: онови кошторис із попередніх повідомлень, ціна доставки тепер 450 PLN замість 380 PLN.",
+    sources: [DOCS.oneClaude, DOCS.rename]
+  },
+  {
+    id: "unread-dot", section: "sidebar-lists",
+    en: "• (blue dot)", uk: "Синя крапка біля чату",
+    short: "Ймовірно, позначає нову відповідь, яку ви ще не бачили",
+    what: "Синя крапка праворуч від назви чату в Recents. Найімовірніше, вона означає, що там є нова відповідь або оновлення, яких ви ще не відкривали.",
+    when: "Ви дали Claude довге завдання (наприклад, розписати фактури) і закрили застосунок. Крапка підкаже, де вже з'явився результат.",
+    tips: [
+      "Відкрийте чат із крапкою, щоб переглянути новий результат."
+    ],
+    example: "Коротко: що нового в цьому завданні, поки мене не було?",
+    verify: "Значення крапки в документації прямо не описане (є лише згадка про крапку-індикатор оновлень у проєктах Claude Code). Уточніть, чи крапка означає «непрочитане», «завершено» чи «потрібна ваша відповідь».",
+    sources: [DOCS.codeProj]
+  },
+
+  /* ---------------- Бічна панель: низ ---------------- */
+  {
+    id: "profile", section: "sidebar-bottom",
+    en: "T (profile)", uk: "Профіль (кружечок із першою літерою вашого імені)",
+    short: "Відкриває меню вашого акаунта",
+    what: "Кружечок із першою літерою вашого імені. Зазвичай тут відкривається меню акаунта з налаштуваннями (Settings).",
+    when: "Потрібно перевірити план підписки, змінити мову або вимкнути пошук по старих чатах (Settings → Memory → «Search and reference chats»).",
+    tips: [
+      "Надішліть скриншот меню, яке відкривається після натискання на кружечок, і його пункти можна буде додати в цей посібник."
+    ],
+    example: "Які налаштування Claude варто змінити, щоб ти завжди відповідав українською і коротко?",
+    verify: "Вміст цього меню не видно на скриншоті. Потрібен окремий скриншот, щоб описати пункти точно.",
+    sources: [DOCS.chatSearch]
+  },
+  {
+    id: "new-session", section: "sidebar-bottom",
+    en: "+ New session", uk: "Нова сесія",
+    short: "Починає нову окрему роботу з Claude Code",
+    what: "Починає нову session (сесію: окрему роботу з Claude Code). У хмарній сесії ви обираєте репозиторій і branch (гілку: окрему копію коду), описуєте завдання й надсилаєте його.",
+    when: "Калькулятор кошторису готовий, а тепер потрібен окремий інструмент для аналізу Excel із продажами. Почніть нову сесію, щоб завдання не змішувалися.",
+    tips: [
+      "Одна сесія — одне завдання. Кілька сесій можуть працювати одночасно.",
+      "Сесія продовжує працювати, навіть якщо ви закрили застосунок; результат чекатиме на будь-якому пристрої."
+    ],
+    example: "Напиши скрипт, який читає Excel із продажами добавок за квартал і показує топ-5 клієнтів за сумою.",
+    sources: [DOCS.mobile, DOCS.cloud]
+  },
+
+  /* ---------------- Екран Code ---------------- */
+  {
+    id: "menu-icon", section: "code-screen",
+    en: "☰ (menu)", uk: "Значок меню (три лінії вгорі)",
+    short: "Відкриває бічну панель меню",
+    what: "Відкриває і закриває бічну панель із розділами Projects, Code, Artifacts тощо.",
+    when: "Ви працюєте в сесії Code і хочете перейти до проєкту з постачальниками.",
+    tips: [
+      "На телефоні бічну панель також зазвичай можна відкрити жестом вправо від лівого краю екрана."
+    ],
+    example: "Підсумуй, що ти вже зробив у цій сесії, щоб я міг перейти до іншої.",
+    sources: []
+  },
+  {
+    id: "devices", section: "code-screen",
+    en: "Devices", uk: "Пристрої",
+    short: "Список ваших комп'ютерів, підключених до Claude Code через Remote Control",
+    what: "Список ваших комп'ютерів, з якими працює Claude Code. Через Remote Control (віддалене керування) ви з телефона керуєте сесією Claude Code, яка працює на вашому комп'ютері, з доступом до його файлів.",
+    when: "Файли з кошторисами лежать тільки на офісному комп'ютері. Ви запускаєте там Claude Code з Remote Control, а продовжуєте роботу з телефона вдома.",
+    tips: [
+      "Комп'ютер має бути ввімкнений, а Claude Code запущений.",
+      "Сесія на комп'ютері, який зараз в мережі, позначається значком комп'ютера із зеленою крапкою."
+    ],
+    example: "Відкрий папку «Кошториси» на моєму комп'ютері й покажи, які файли змінювалися цього тижня.",
+    verify: "Розділ із назвою «Devices» у документації окремо не описаний. Уточніть, чи тут показуються лише комп'ютери з Remote Control, чи й комп'ютери з Claude Desktop для Dispatch.",
+    sources: [DOCS.remote, DOCS.mobile]
+  },
+  {
+    id: "add-device", section: "code-screen",
+    en: "+ Add de…", uk: "Додати пристрій (назву обрізано на скриншоті)",
+    short: "Підключає новий комп'ютер до Claude Code",
+    what: "Кнопка, щоб підключити новий комп'ютер. За документацією, комп'ютер підключають так: у терміналі запускають команду claude remote-control і скановують телефоном QR-код, або знаходять сесію у вкладці Code.",
+    when: "Ви поставили Claude Code на новий ноутбук і хочете керувати ним з телефона.",
+    tips: [
+      "Потрібен той самий акаунт claude.ai на комп'ютері й телефоні.",
+      "Команда /mobile у Claude Code показує QR-код для завантаження застосунку."
+    ],
+    example: "Поясни покроково для новачка, як підключити мій ноутбук з Windows до Claude Code на телефоні.",
+    verify: "Повна назва кнопки на скриншоті обрізана (ймовірно, «Add device»). Уточніть назву і кроки, які вона пропонує.",
+    sources: [DOCS.remote]
+  },
+  {
+    id: "sessions", section: "code-screen",
+    en: "Sessions", uk: "Сесії",
+    short: "Список ваших сесій Claude Code",
+    what: "Список ваших сесій Claude Code з назвою і репозиторієм під нею. Сесії синхронізуються між пристроями: завдання, почате на комп'ютері, можна переглянути з телефона, і навпаки.",
+    when: "Ви запустили завдання «зробити калькулятор кошторису» і пішли на зустріч. Потім відкриваєте Sessions, щоб перевірити результат або відповісти на питання Claude.",
+    tips: [
+      "Значок-коло, що крутиться, біля сесії, найімовірніше, означає, що вона ще працює.",
+      "Завершені сесії архівуйте, щоб список був коротким. Видалення остаточне."
+    ],
+    example: "Покажи, що ти змінив у цій сесії, і поясни простими словами, як перевірити результат.",
+    sources: [DOCS.mobile, DOCS.cloud]
+  },
+  {
+    id: "search-sessions", section: "code-screen",
+    en: "🔍 (search button)", uk: "Кругла кнопка пошуку внизу екрана Code",
+    short: "Ймовірно, шукає серед сесій Claude Code",
+    what: "Кнопка пошуку на екрані Code. Найімовірніше, вона шукає серед ваших сесій.",
+    when: "У вас багато сесій, і потрібно швидко знайти ту, де робили калькулятор кошторису.",
+    tips: [
+      "Давайте сесіям зрозумілі назви, тоді їх легше знайти."
+    ],
+    example: "калькулятор кошторису",
+    verify: "У документації ця кнопка не описана. Уточніть, чи вона шукає лише сесії, чи також репозиторії.",
+    sources: []
+  }
+];
+
+/* ========================= ЛОГІКА ========================= */
+
+const STORE_KEY = "claudeMenuGuide.learned.v1";
+const THEME_KEY = "claudeMenuGuide.theme";
+
+function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function safeSet(key, v) { try { localStorage.setItem(key, v); } catch (e) { /* storage unavailable */ } }
+
+let learned = new Set();
+try { learned = new Set(JSON.parse(safeGet(STORE_KEY) || "[]")); } catch (e) { learned = new Set(); }
+function saveLearned() { safeSet(STORE_KEY, JSON.stringify([...learned])); }
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ---------- theme ---------- */
+function applyTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+}
+applyTheme(safeGet(THEME_KEY));
+$("#themeBtn").addEventListener("click", () => {
+  const cur = document.documentElement.getAttribute("data-theme")
+    || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  applyTheme(next); safeSet(THEME_KEY, next);
+});
+
+/* ---------- progress ---------- */
+function updateProgress() {
+  const n = ITEMS.filter(i => learned.has(i.id)).length;
+  $("#progressText").textContent = `Вивчено ${n} з ${ITEMS.length}`;
+  $("#progressBar").style.width = (ITEMS.length ? n / ITEMS.length * 100 : 0) + "%";
+}
+
+/* ---------- copy ---------- */
+function copyText(text, btn) {
+  const done = () => { btn.textContent = "Скопійовано ✓"; btn.classList.add("done");
+    setTimeout(() => { btn.textContent = "Копіювати"; btn.classList.remove("done"); }, 1500); };
+  const fallback = () => {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { btn.textContent = "Не вдалося"; }
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+  else fallback();
+}
+
+/* ---------- list mode ---------- */
+function itemHTML(it) {
+  const src = it.sources && it.sources.length
+    ? `<div class="sources">Джерело: ${it.sources.map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https:\/\//, ""))}</a>`).join(", ")}</div>`
+    : `<div class="sources">Джерело: власний скриншот (у документації не знайдено)</div>`;
+  return `
+  <article class="item${learned.has(it.id) ? " learned" : ""}" id="item-${esc(it.id)}" data-id="${esc(it.id)}">
+    <div class="item-head">
+      <div class="names">
+        <div class="en">${esc(it.en)}</div>
+        <div class="uk">${esc(it.uk)}</div>
+      </div>
+      <label class="learn"><input type="checkbox" ${learned.has(it.id) ? "checked" : ""}> Вивчено</label>
+    </div>
+    ${it.verify ? `<div class="warn"><b>⚠ перевірити:</b> ${esc(it.verify)}</div>` : ""}
+    <div class="block"><h3>Що це робить</h3><p>${esc(it.what)}</p></div>
+    <div class="block"><h3>Коли використовувати</h3><p>${esc(it.when)}</p></div>
+    <div class="block"><h3>Як краще користуватися</h3><ul>${it.tips.map(t => `<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div class="block"><h3>Приклад</h3>
+      <div class="example"><q>${esc(it.example)}</q><button type="button" class="copy">Копіювати</button></div>
+    </div>
+    ${src}
+  </article>`;
+}
+
+function renderList() {
+  $("#toc").innerHTML = SECTIONS.map(s => `<li><a href="#sec-${s.id}">${esc(s.title)}</a></li>`).join("")
+    + `<li><a href="#mode-cards" data-go="cards">Режим «Картки»</a></li><li><a href="#mode-quiz" data-go="quiz">Режим «Тест»</a></li>`;
+  $("#glossary").innerHTML = GLOSSARY.map(([t, d]) => `<dt>${esc(t)}</dt><dd>${esc(d)}</dd>`).join("");
+  $("#sections").innerHTML = SECTIONS.map(s => `
+    <section class="group" id="sec-${s.id}" data-section="${s.id}">
+      <h2>${esc(s.title)}</h2><p class="sub">${esc(s.sub)}</p>
+      ${ITEMS.filter(i => i.section === s.id).map(itemHTML).join("")}
+    </section>`).join("");
+}
+
+function norm(s) { return String(s).toLowerCase().replace(/[’'ʼ]/g, "'"); }
+function applyFilter() {
+  const q = norm($("#search").value.trim());
+  const hide = $("#hideLearned").checked;
+  let shown = 0;
+  document.querySelectorAll("article.item").forEach(el => {
+    const it = ITEMS.find(i => i.id === el.dataset.id);
+    const hay = norm([it.en, it.uk, it.short, it.what, it.when, it.tips.join(" "), it.example].join(" "));
+    const ok = (!q || hay.includes(q)) && !(hide && learned.has(it.id));
+    el.hidden = !ok; if (ok) shown++;
+  });
+  document.querySelectorAll("section.group").forEach(sec => {
+    sec.hidden = !sec.querySelector("article.item:not([hidden])");
+  });
+  $("#noResults").hidden = shown > 0;
+  $("#searchCount").textContent = q || hide ? `Показано ${shown} з ${ITEMS.length}` : "";
+}
+
+function setLearned(id, on) {
+  on ? learned.add(id) : learned.delete(id);
+  saveLearned(); updateProgress();
+  const el = document.getElementById("item-" + id);
+  if (el) { el.classList.toggle("learned", on); el.querySelector(".learn input").checked = on; }
+}
+
+$("#sections").addEventListener("change", e => {
+  if (!e.target.matches(".learn input")) return;
+  setLearned(e.target.closest("article").dataset.id, e.target.checked);
+  applyFilter();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest(".copy");
+  if (b) copyText(b.parentElement.querySelector("q").textContent, b);
+});
+$("#search").addEventListener("input", applyFilter);
+$("#hideLearned").addEventListener("change", applyFilter);
+
+/* ---------- mode switching ---------- */
+function setMode(mode) {
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.mode === mode)));
+  ["list", "cards", "quiz"].forEach(m => $("#mode-" + m).hidden = m !== mode);
+  if (mode === "cards") startCards();
+  if (mode === "quiz") startQuiz();
+  if (mode === "list") { applyFilter(); }
+  window.scrollTo({ top: 0 });
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+$("#toc").addEventListener("click", e => {
+  const a = e.target.closest("a[data-go]");
+  if (a) { e.preventDefault(); setMode(a.dataset.go); }
+});
+
+/* ---------- cards mode ---------- */
+let deck = [], cardIdx = 0, flipped = false;
+function buildDeck(random) {
+  let d = $("#cardsOnlyNew").checked ? ITEMS.filter(i => !learned.has(i.id)) : ITEMS.slice();
+  deck = random ? shuffle(d) : d; cardIdx = 0; flipped = false;
+}
+function startCards() { buildDeck(false); renderCard(); }
+function renderCard() {
+  const f = $("#flash");
+  if (!deck.length) {
+    f.innerHTML = `<div class="en">🎉</div><div class="hint">Усі пункти вивчено. Зніміть галочку «Тільки ще не вивчені», щоб повторити.</div>`;
+    $("#cardCount").textContent = "0 / 0"; return;
+  }
+  const it = deck[cardIdx];
+  f.innerHTML = flipped
+    ? `<div class="en">${esc(it.en)}</div>
+       <div class="back">
+         <div class="uk">${esc(it.uk)}</div>
+         ${it.verify ? `<div class="warn"><b>⚠ перевірити</b></div>` : ""}
+         <div class="block"><h3>Що це робить</h3><p>${esc(it.what)}</p></div>
+         <div class="block"><h3>Приклад</h3><div class="example"><q>${esc(it.example)}</q><button type="button" class="copy">Копіювати</button></div></div>
+       </div>`
+    : `<div class="en">${esc(it.en)}</div><div class="hint">Натисніть, щоб побачити переклад і пояснення</div>`;
+  $("#cardCount").textContent = `${cardIdx + 1} / ${deck.length}`;
+  $("#cardLearn").textContent = learned.has(it.id) ? "↺ Ще не знаю" : "✓ Я це знаю";
+}
+function flip(e) { if (e && e.target.closest(".copy")) return; flipped = !flipped; renderCard(); }
+$("#flash").addEventListener("click", flip);
+$("#flash").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); } });
+$("#cardNext").addEventListener("click", () => { if (!deck.length) return; cardIdx = (cardIdx + 1) % deck.length; flipped = false; renderCard(); });
+$("#cardPrev").addEventListener("click", () => { if (!deck.length) return; cardIdx = (cardIdx - 1 + deck.length) % deck.length; flipped = false; renderCard(); });
+$("#cardShuffle").addEventListener("click", () => { buildDeck(true); renderCard(); });
+$("#cardsOnlyNew").addEventListener("change", startCards);
+$("#cardLearn").addEventListener("click", () => {
+  if (!deck.length) return;
+  const it = deck[cardIdx];
+  setLearned(it.id, !learned.has(it.id));
+  if ($("#cardsOnlyNew").checked && learned.has(it.id)) {
+    deck.splice(cardIdx, 1); if (cardIdx >= deck.length) cardIdx = 0; flipped = false;
+  } else { cardIdx = (cardIdx + 1) % deck.length; flipped = false; }
+  renderCard();
+});
+
+/* ---------- quiz mode ---------- */
+const QUIZ_LEN = 10;
+let quiz = null;
+function startQuiz() {
+  const pool = shuffle(ITEMS);
+  const qs = [];
+  for (let i = 0; i < QUIZ_LEN; i++) qs.push(pool[i % pool.length]);
+  quiz = {
+    idx: 0, score: 0, answered: false, wrong: [],
+    questions: qs.map(it => {
+      const others = shuffle(ITEMS.filter(o => o.id !== it.id && o.short !== it.short)).slice(0, 2);
+      return { it, options: shuffle([it, ...others]) };
+    })
+  };
+  renderQuiz();
+}
+function renderQuiz() {
+  const box = $("#quiz");
+  if (quiz.idx >= quiz.questions.length) {
+    const pct = Math.round(quiz.score / quiz.questions.length * 100);
+    box.innerHTML = `
+      <div class="quiz-meta">Результат</div>
+      <div class="score">${quiz.score} / ${quiz.questions.length}</div>
+      <p style="text-align:center">${pct >= 90 ? "Чудово! Ви добре знаєте меню." : pct >= 60 ? "Непогано. Повторіть пункти нижче." : "Варто ще раз переглянути список або картки."}</p>
+      ${quiz.wrong.length ? `<h3>Повторіть:</h3><ul class="review">${quiz.wrong.map(it => `<li><a href="#item-${esc(it.id)}" data-review="${esc(it.id)}"><b>${esc(it.en)}</b></a> — ${esc(it.short)}</li>`).join("")}</ul>` : ""}
+      <button type="button" class="primary" id="quizRestart">Пройти ще раз</button>`;
+    $("#quizRestart").addEventListener("click", startQuiz);
+    box.querySelectorAll("a[data-review]").forEach(a => a.addEventListener("click", e => {
+      e.preventDefault(); setMode("list");
+      $("#search").value = ""; $("#hideLearned").checked = false; applyFilter();
+      document.getElementById("item-" + a.dataset.review).scrollIntoView({ behavior: "smooth" });
+    }));
+    return;
+  }
+  const q = quiz.questions[quiz.idx];
+  box.innerHTML = `
+    <div class="quiz-q">
+      <div class="quiz-meta">Питання ${quiz.idx + 1} з ${quiz.questions.length} · Правильних: ${quiz.score}</div>
+      <p style="margin:10px 0 0">Що робить ця функція?</p>
+      <div class="en">${esc(q.it.en)}</div>
+    </div>
+    <div class="options">${q.options.map(o => `<button type="button" data-id="${esc(o.id)}">${esc(o.short)}</button>`).join("")}</div>
+    <div class="feedback" id="feedback"></div>
+    <button type="button" class="primary" id="quizNext" hidden>${quiz.idx + 1 < quiz.questions.length ? "Наступне питання →" : "Показати результат"}</button>`;
+  box.querySelectorAll(".options button").forEach(b => b.addEventListener("click", () => answer(b)));
+  $("#quizNext").addEventListener("click", () => { quiz.idx++; quiz.answered = false; renderQuiz(); });
+}
+function answer(btn) {
+  if (quiz.answered) return;
+  quiz.answered = true;
+  const q = quiz.questions[quiz.idx];
+  const right = btn.dataset.id === q.it.id;
+  if (right) quiz.score++; else quiz.wrong.push(q.it);
+  document.querySelectorAll("#quiz .options button").forEach(b => {
+    b.disabled = true;
+    if (b.dataset.id === q.it.id) b.classList.add("right");
+    else if (b === btn) b.classList.add("wrong");
+  });
+  $("#feedback").innerHTML = (right ? "✅ Правильно! " : "❌ Не зовсім. ")
+    + `<b>${esc(q.it.en)}</b> (${esc(q.it.uk)}): ${esc(q.it.what)}`;
+  $("#quizNext").hidden = false;
+}
+
+/* ---------- start ---------- */
+renderList();
+updateProgress();
+applyFilter();
+</script>
+</body>
+</html>
