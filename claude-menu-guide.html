@@ -152,12 +152,14 @@
   @media (min-width: 960px) {
     .learn { grid-template-columns: 380px minmax(0, 1fr); align-items: start; }
     .phone-col { position: sticky; top: 132px; }
+    .pscreen { max-height: calc(100vh - 250px); min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
   }
 
   /* ---------- phone replica ---------- */
   .phone-col { display: grid; gap: 12px; justify-items: center; }
   .screen-switch { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 99px; }
-  .screen-switch button { border: 0; background: transparent; padding: 6px 14px; border-radius: 99px; font-size: 14px; font-weight: 600; color: var(--muted); }
+  .screen-switch { flex-wrap: wrap; justify-content: center; }
+  .screen-switch button { border: 0; background: transparent; padding: 6px 12px; border-radius: 99px; font-size: 14px; font-weight: 600; color: var(--muted); }
   .screen-switch button[aria-pressed="true"] { background: var(--surface); color: var(--ink); }
   .phone {
     width: 100%; max-width: 340px;
@@ -195,6 +197,24 @@
   .hot.pill:hover { background: var(--phone-pill); opacity: .9; }
   .hot.pill.sel { box-shadow: 0 0 0 3px var(--accent); }
   .pcode { background: var(--phone-main); }
+  .pset { background: var(--phone-bg); padding-inline: 12px; }
+  .sbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 2px 10px; border-bottom: 1px solid var(--phone-sel); margin-bottom: 8px; }
+  .sbar strong { font-size: 17px; }
+  .sgroup { background: var(--phone-main); border-radius: 14px; display: grid; overflow: hidden; }
+  .sgroup .hot { border-radius: 0; padding: 11px 12px; }
+  .sgroup .hot + .hot { border-top: 1px solid var(--phone-sel); }
+  .slabel { font-size: 13px; color: var(--phone-muted); padding: 14px 6px 6px; }
+  .hot.slabel { padding: 14px 6px 6px; font-size: 13px; color: var(--phone-muted); }
+  .hot.srow svg.i { width: 20px; height: 20px; }
+  .hot .hint { color: var(--phone-muted); font-size: 14px; }
+  .hot .chev { color: var(--phone-muted); }
+  .hot.blue { color: #2a6ad8; }
+  .tog { width: 40px; height: 24px; border-radius: 99px; background: var(--phone-sel); position: relative; flex: 0 0 auto; }
+  .tog::after { content: ""; position: absolute; left: 2px; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .themes { display: flex; gap: 8px; padding: 10px; }
+  .themes i { flex: 1; height: 44px; border-radius: 8px; border: 1px solid var(--phone-sel); background: #fff; }
+  .themes i:nth-child(2) { background: #1f1e1c; }
+  .themes i:nth-child(3) { background: linear-gradient(135deg, #fff 50%, #1f1e1c 50%); border: 2px solid #2a6ad8; }
   .pcode .plabel { padding: 16px 12px 6px; }
   .adddev { border: 1px solid var(--phone-sel); border-radius: 14px; padding: 12px 14px; }
   .sess { display: flex; gap: 12px; padding: 8px 12px; align-items: flex-start; }
@@ -341,6 +361,7 @@
         <div class="screen-switch" role="group" aria-label="Який екран показати">
           <button type="button" data-screen="side" aria-pressed="true">Бічна панель</button>
           <button type="button" data-screen="code" aria-pressed="false">Екран Code</button>
+          <button type="button" data-screen="settings" aria-pressed="false">Settings</button>
         </div>
         <div class="phone" id="phone">
           <div class="status"><span>21:58</span><span class="island"></span><span>5G</span></div>
@@ -366,6 +387,36 @@
               <button type="button" class="hot icon-only" data-item="profile" aria-label="Профіль"></button>
               <button type="button" class="hot pill" data-item="new-session"></button>
             </div>
+          </div>
+
+          <div class="pscreen pset" data-screen="settings" hidden>
+            <div class="sbar">
+              <button type="button" class="hot icon-only" data-item="close-settings" aria-label="Закрити"></button>
+              <strong>Settings</strong>
+              <button type="button" class="hot icon-only" data-item="info-settings" aria-label="Інформація"></button>
+            </div>
+            <div class="sgroup"><button type="button" class="hot srow blue" data-item="add-account"></button></div>
+            <div class="slabel">Account</div>
+            <div class="sgroup">
+              <button type="button" class="hot srow" data-item="s-profile"></button>
+              <button type="button" class="hot srow" data-item="billing" data-hint="Pro plan"></button>
+              <button type="button" class="hot srow" data-item="upgrade" data-nochev="1"></button>
+              <button type="button" class="hot srow" data-item="usage"></button>
+              <button type="button" class="hot srow" data-item="notifications"></button>
+              <button type="button" class="hot srow" data-item="privacy"></button>
+              <button type="button" class="hot srow" data-item="shared-links"></button>
+            </div>
+            <div class="slabel">App</div>
+            <div class="sgroup">
+              <button type="button" class="hot srow" data-item="capabilities"></button>
+              <button type="button" class="hot srow" data-item="s-claude-code"></button>
+              <button type="button" class="hot srow" data-item="connectors"></button>
+              <button type="button" class="hot srow" data-item="permissions"></button>
+              <button type="button" class="hot srow" data-item="voice"></button>
+              <button type="button" class="hot srow" data-item="haptic" data-toggle="1"></button>
+            </div>
+            <button type="button" class="hot slabel" data-item="appearance"></button>
+            <div class="sgroup themes" aria-hidden="true"><i></i><i></i><i></i></div>
           </div>
 
           <div class="pscreen pcode" data-screen="code" hidden>
@@ -423,7 +474,10 @@ const SECTIONS = [
   { id: "sidebar-nav",    title: "Головне меню" },
   { id: "sidebar-lists",  title: "Списки" },
   { id: "sidebar-bottom", title: "Низ панелі" },
-  { id: "code-screen",    title: "Екран Code" }
+  { id: "code-screen",    title: "Екран Code" },
+  { id: "set-account",    title: "Settings: Account" },
+  { id: "set-app",        title: "Settings: App" },
+  { id: "set-look",       title: "Settings: вигляд і кнопки" }
 ];
 
 const GLOSSARY = [
@@ -560,11 +614,11 @@ const ITEMS = [
   { id: "profile", section: "sidebar-bottom", icon: "user",
     en: "T", uk: "Профіль (кружечок із вашою літерою)",
     short: "Відкриває меню вашого акаунта",
-    what: "Кружечок із першою літерою вашого імені. Зазвичай відкриває меню акаунта з налаштуваннями (Settings).",
-    when: "Перевірити план підписки або вимкнути пошук по старих чатах (Settings → Memory).",
-    tips: ["Надішліть скриншот цього меню, і його пункти з'являться в посібнику."],
+    what: "Кружечок із першою літерою вашого імені. Відкриває налаштування акаунта й застосунку (Settings). Усі пункти Settings описані нижче, в окремих розділах.",
+    when: "Перевірити план підписки, ліміти (Usage) або підключити Gmail (Connectors).",
+    tips: ["На телефоні перемкніть макет на «Settings», щоб побачити всі пункти."],
     example: "Які налаштування Claude варто змінити, щоб ти завжди відповідав українською і коротко?",
-    verify: "Вміст меню не видно на скриншоті. Потрібен окремий знімок.",
+    verify: "Скриншоти показують Settings, але не сам момент натискання на T. Уточніть, що саме цей кружечок відкриває Settings.",
     sources: [DOCS.chatSearch] },
 
   { id: "new-session", section: "sidebar-bottom", icon: "plus",
@@ -625,6 +679,185 @@ const ITEMS = [
     tips: ["Давайте сесіям зрозумілі назви."],
     example: "калькулятор кошторису",
     verify: "Кнопка в документації не описана. Уточніть, чи шукає вона лише сесії.",
+    sources: [] },
+
+  /* ---------------- Settings: Account ---------------- */
+  { id: "add-account", section: "set-account", icon: "adduser",
+    en: "Add account", uk: "Додати акаунт",
+    short: "Додає ще один акаунт Claude на цей телефон",
+    what: "Додає ще один акаунт Claude у застосунок, наприклад робочий поруч з особистим.",
+    when: "У вас є особистий акаунт і окремий акаунт фірми. Обидва можна тримати на одному телефоні й не виходити щоразу з акаунта.",
+    tips: ["Перед початком розмови перевіряйте, в якому акаунті ви зараз, щоб робочі файли не потрапили в особистий.",
+           "Проєкти, чати й підписка в кожного акаунта свої."],
+    example: "Нагадай, які проєкти в мене є в цьому акаунті, щоб я впевнився, що працюю в робочому.",
+    verify: "Кнопка в документації не описана. Уточніть, як перемикатися між акаунтами після додавання.",
+    sources: [] },
+
+  { id: "s-profile", section: "set-account", icon: "profile",
+    en: "Profile", uk: "Профіль",
+    short: "Ваші дані: ім'я та інформація про вас",
+    what: "Ваші особисті дані в акаунті: ім'я, пошта.",
+    when: "Хочете змінити, як Claude до вас звертається, або перевірити, на яку пошту зареєстрований акаунт.",
+    tips: ["Вкажіть ім'я так, як хочете, щоб Claude вас називав."],
+    example: "Звертайся до мене на «ти» і відповідай українською, навіть якщо я пишу польською.",
+    verify: "Точний перелік полів цієї сторінки в документації не знайдено. Уточніть, чи є тут поле «що Claude має знати про вас» (особисті вподобання).",
+    sources: [] },
+
+  { id: "billing", section: "set-account", icon: "dollar",
+    en: "Billing", uk: "Оплата (праворуч видно ваш план: Pro plan)",
+    short: "Керування підпискою і оплатою",
+    what: "Показує ваш поточний план (у вас Pro plan) і дозволяє керувати підпискою та способом оплати.",
+    when: "Потрібен рахунок для бухгалтерії або треба змінити картку, з якої списується підписка.",
+    tips: ["Якщо підписку купили через App Store, керувати нею треба в налаштуваннях iPhone (Apple ID → Підписки).",
+           "Pro дає доступ до Projects без обмежень, Scheduled, Code і більшого ліміту повідомлень, ніж безкоштовний план."],
+    example: "Порахуй, скільки я витрачаю на підписку Claude на рік у PLN, якщо платитиму щомісяця.",
+    verify: "Вміст сторінки Billing на телефоні не видно на скриншоті. Уточніть, чи можна тут завантажити рахунок-фактуру.",
+    sources: ["https://support.claude.com/en/articles/8325606-what-is-the-pro-plan"] },
+
+  { id: "upgrade", section: "set-account", icon: "up",
+    en: "Upgrade to Max plan", uk: "Перейти на план Max",
+    short: "Переходить на дорожчий план із більшими лімітами",
+    what: "Переводить вас на план Max. Є два рівні: Max 5x (у 5 разів більше використання за сесію, ніж Pro) і Max 20x (у 20 разів більше). Власники Max також раніше отримують нові функції.",
+    when: "Ви щодня аналізуєте великі Excel-файли й прайси і часто бачите повідомлення про вичерпаний ліміт.",
+    tips: ["Спершу подивіться Usage: якщо ліміт закінчується рідко, Pro вистачає.",
+           "Ліміт сесії оновлюється кожні 5 годин, тож іноді достатньо просто зачекати."],
+    example: "Я використовую Claude щодня для листів постачальникам і аналізу Excel. Допоможи оцінити, чи потрібен мені Max, якщо ліміт закінчується 2–3 рази на тиждень.",
+    sources: ["https://support.claude.com/en/articles/11049741-what-is-the-max-plan"] },
+
+  { id: "usage", section: "set-account", icon: "chart",
+    en: "Usage", uk: "Використання",
+    short: "Показує, скільки ліміту ви вже використали",
+    what: "Смужки прогресу показують, скільки ви використали з ліміту поточної 5-годинної сесії і тижневого ліміту, а також коли він оновиться.",
+    when: "Перед великим завданням (наприклад, аналіз річних продажів) перевірте, чи вистачить ліміту, щоб робота не зупинилася посередині.",
+    tips: ["Довгі чати з великими файлами витрачають ліміт швидше. Нове завдання краще починати в новому чаті.",
+           "Час наступного оновлення ліміту видно саме тут."],
+    example: "Стисло підсумуй нашу розмову в 10 пунктах, щоб я продовжив у новому чаті й не витрачав ліміт.",
+    sources: ["https://support.claude.com/en/articles/11647753-how-do-usage-and-length-limits-work"] },
+
+  { id: "notifications", section: "set-account", icon: "bell",
+    en: "Notifications", uk: "Сповіщення",
+    short: "Налаштування push-сповіщень від Claude",
+    what: "Налаштування сповіщень на телефон. За документацією, Claude надсилає сповіщення, коли завдання готове або коли потрібне ваше рішення.",
+    when: "Ви дали Claude довге завдання (зведення пропозицій постачальників) і хочете дізнатися, коли воно готове, не відкриваючи застосунок.",
+    tips: ["Якщо сповіщення не приходять, перевірте також налаштування iPhone: Settings → Notifications → Claude, і режими Focus."],
+    example: "Коли закінчиш зведення пропозицій, коротко напиши 3 головні висновки.",
+    verify: "Перелік перемикачів на цій сторінці в документації не знайдено. Уточніть, які типи сповіщень можна вмикати окремо.",
+    sources: [DOCS.dispatch, DOCS.remote] },
+
+  { id: "privacy", section: "set-account", icon: "shield",
+    en: "Privacy", uk: "Конфіденційність",
+    short: "Керує тим, як використовуються ваші дані",
+    what: "Тут є перемикач «Help improve Claude»: чи можна використовувати ваші нові чати для навчання моделей Claude. Тут також список чатів, якими ви поділилися (Shared chats).",
+    when: "Ви працюєте з цінами постачальників і даними клієнтів і не хочете, щоб ці розмови йшли на навчання моделей.",
+    tips: ["Вимкнення діє на нові чати; на вже навчені моделі воно не впливає.",
+           "Навіть з вимкненим навчанням не вставляйте в чат паролі й номери карток."],
+    example: "Перш ніж я надішлю тобі таблицю клієнтів, підкажи, які колонки варто прибрати, щоб не передавати зайвих персональних даних.",
+    sources: ["https://privacy.claude.com/en/articles/12109829-how-do-i-change-my-model-improvement-privacy-settings"] },
+
+  { id: "shared-links", section: "set-account", icon: "clip",
+    en: "Shared links", uk: "Спільні посилання",
+    short: "Список чатів, якими ви поділилися за посиланням",
+    what: "Список чатів, якими ви поділилися за посиланням. Людина з посиланням бачить знімок чату на момент, коли ви поділилися; нові повідомлення лишаються приватними. Тут можна вимкнути посилання.",
+    when: "Ви надіслали колезі посилання на чат із розрахунком кошторису, а тепер там є дані, які не варто показувати. Вимкніть посилання, і воно перестане працювати.",
+    tips: ["Перевіряйте цей список час від часу й вимикайте старі посилання.",
+           "Щоб колега побачив нові повідомлення, оновіть знімок через «Update shared chat»."],
+    example: "Підготуй коротке резюме цього чату без цін і назв клієнтів, щоб я міг поділитися ним із партнером.",
+    verify: "У довідці керування спільними чатами описано в Settings → Privacy → Shared chats. Уточніть, чи ця сторінка показує те саме.",
+    sources: ["https://support.claude.com/en/articles/10593882-share-and-unshare-chats"] },
+
+  /* ---------------- Settings: App ---------------- */
+  { id: "capabilities", section: "set-app", icon: "sliders",
+    en: "Capabilities", uk: "Можливості",
+    short: "Вмикає й вимикає функції Claude, наприклад створення файлів",
+    what: "Перемикачі функцій Claude. Наприклад, «Code execution and file creation» дозволяє Claude запускати код і створювати файли (Excel, Word, PowerPoint, PDF). Без нього не працюють і артефакти.",
+    when: "Ви просите зробити Excel-кошторис файлом, а Claude відповідає лише текстом. Перевірте, чи увімкнене створення файлів.",
+    tips: ["Для роботи з Excel і створення документів тримайте «Code execution and file creation» увімкненим.",
+           "Якщо Claude каже, що не може щось зробити, спершу загляньте сюди."],
+    example: "Створи Excel-файл кошторису: колонки «Добавка», «кг», «Ціна за кг», «Сума», з формулами й підсумком з ПДВ 23%.",
+    verify: "Повний перелік перемикачів на телефоні не видно. Уточніть, які ще функції тут є (наприклад, пам'ять чи пошук у вебі).",
+    sources: ["https://support.claude.com/en/articles/12111783-create-and-edit-files-with-claude", DOCS.artifacts] },
+
+  { id: "s-claude-code", section: "set-app", icon: "codebox",
+    en: "Claude Code", uk: "Налаштування Claude Code",
+    short: "Налаштування для розділу Code",
+    what: "Налаштування для Claude Code (розділу Code). У довідці тут згадано, наприклад, налаштування спільного доступу до сесій.",
+    when: "Ви ділитеся сесією Code з колегою і хочете, щоб її бачили лише люди з доступом до вашого репозиторію.",
+    tips: ["Якщо ви ще не працюєте з Code, тут можна нічого не міняти."],
+    example: "Поясни простими словами, що таке репозиторій і гілка на GitHub і навіщо вони Claude Code.",
+    verify: "Вміст цієї сторінки на телефоні не видно на скриншоті. Уточніть, які налаштування тут є.",
+    sources: [DOCS.cloud] },
+
+  { id: "connectors", section: "set-app", icon: "grid",
+    en: "Connectors", uk: "Конектори",
+    short: "Підключає Claude до інших сервісів: пошти, диска, календаря",
+    what: "Connectors (конектори) підключають Claude до інших сервісів: Gmail, Google Calendar, Google Drive, Microsoft 365, Slack та інших. Тоді Claude може шукати листи, читати документи й створювати події. Працюють через MCP (стандарт для підключення зовнішніх програм).",
+    when: "Підключіть Gmail, і Claude знайде всі листи від постачальника за квартал та витягне ціни в таблицю. Або Google Drive, щоб Claude читав прайси без завантаження файлів.",
+    tips: ["Підключайте лише те, чим справді користуєтеся.",
+           "Перед надсиланням листа Claude зазвичай просить підтвердження, тож перечитуйте чернетку."],
+    example: "Знайди в Gmail усі листи від постачальників за вересень, де є ціни на добавки, і склади таблицю: постачальник, продукт, ціна, дата.",
+    sources: ["https://support.claude.com/en/articles/11176164-use-connectors-to-extend-claude-s-capabilities", "https://support.claude.com/en/articles/10166901-use-google-workspace-connectors"] },
+
+  { id: "permissions", section: "set-app", icon: "toggles",
+    en: "Permissions", uk: "Дозволи",
+    short: "Доступ Claude до функцій телефона або до дій без підтвердження",
+    what: "Керує дозволами. Документація згадує два види: доступ застосунку до функцій iPhone (Location, Calendar, Reminders, Apple Health) і режими «Auto» чи «Manual», тобто чи виконує Claude дії сам, чи питає вас щоразу.",
+    when: "Ви хочете, щоб Claude сам додавав зустрічі з постачальниками в календар, тож дозволяєте доступ до Calendar.",
+    tips: ["Давайте доступ лише до того, що потрібно.",
+           "Доступ до функцій iPhone також можна змінити в налаштуваннях iPhone: Settings → Claude."],
+    example: "Додай у мій календар зустріч із постачальником у четвер о 10:00 на годину, назва «Переговори щодо ціни на стабілізатор».",
+    verify: "На скриншоті не видно, що всередині. Уточніть, чи це дозволи iPhone, чи режими Auto/Manual для дій Claude.",
+    sources: ["https://support.claude.com/en/articles/11869619-use-claude-with-ios-apps", DOCS.oneClaude] },
+
+  { id: "voice", section: "set-app", icon: "voice",
+    en: "Voice", uk: "Голос",
+    short: "Налаштування голосового режиму",
+    what: "Налаштування голосового режиму, у якому ви говорите з Claude вголос, а він відповідає голосом. У документації згадано вибір голосу та швидкості мовлення.",
+    when: "Ви за кермом їдете до клієнта й хочете голосом продиктувати лист постачальнику або спитати, як порахувати знижку.",
+    tips: ["Голосовий режим доступний на всіх планах, навіть безкоштовному.",
+           "Застосунку потрібен дозвіл на мікрофон."],
+    example: "Продиктуй мені коротко: які три питання поставити постачальнику перед замовленням 5 тонн добавки?",
+    verify: "Точний вміст цієї сторінки на телефоні в документації не описаний (налаштування голосу там описані всередині голосового режиму).",
+    sources: ["https://support.claude.com/en/articles/11101966-use-voice-mode"] },
+
+  { id: "haptic", section: "set-app", icon: "vibrate",
+    en: "Haptic feedback", uk: "Тактильний відгук (вібрація)",
+    short: "Вмикає легку вібрацію під час натискань",
+    what: "Перемикач легкої вібрації телефона при натисканнях у застосунку. На вашому скриншоті вимкнено.",
+    when: "Увімкніть, якщо хочете відчувати, що натискання спрацювало; вимкніть, щоб телефон не вібрував на нарадах.",
+    tips: ["На роботу Claude це не впливає, це лише відчуття в руці."],
+    example: "Які налаштування в застосунку Claude на iPhone варто перевірити новачку в першу чергу?",
+    verify: "У документації Claude цей перемикач окремо не описаний; пояснення дано за загальним значенням терміна.",
+    sources: [] },
+
+  /* ---------------- Settings: вигляд і кнопки ---------------- */
+  { id: "appearance", section: "set-look", icon: "palette",
+    en: "Appearance", uk: "Вигляд (тема)",
+    short: "Вибір світлої, темної або автоматичної теми",
+    what: "Вибір вигляду застосунку. На скриншоті видно три варіанти: світлий, темний і змішаний (найімовірніше, «як у системі», він зараз вибраний).",
+    when: "Увечері темна тема менше втомлює очі, коли переглядаєте кошториси.",
+    tips: ["Автоматичний варіант сам перемикається разом із темою iPhone."],
+    example: "Як на iPhone увімкнути темну тему за розкладом увечері?",
+    verify: "Нижню частину розділу на скриншоті обрізано. Уточніть назви варіантів.",
+    sources: [] },
+
+  { id: "close-settings", section: "set-look", icon: "close",
+    en: "✕", uk: "Закрити налаштування",
+    short: "Закриває сторінку налаштувань",
+    what: "Закриває Settings і повертає до застосунку.",
+    when: "Ви змінили налаштування і повертаєтеся до чату з постачальником.",
+    tips: ["Зміни зберігаються одразу, окремої кнопки «Зберегти» немає."],
+    example: "Продовжимо лист постачальнику з того місця, де зупинилися.",
+    verify: "Чи зміни зберігаються одразу, не описано в документації; перевірте, повернувшись у налаштування.",
+    sources: [] },
+
+  { id: "info-settings", section: "set-look", icon: "info",
+    en: "ⓘ", uk: "Значок інформації вгорі праворуч",
+    short: "Ймовірно, показує інформацію про застосунок",
+    what: "Значок «i» у правому верхньому куті налаштувань. Найімовірніше, показує інформацію про застосунок: версію, умови використання, довідку.",
+    when: "Служба підтримки просить назвати версію застосунку.",
+    tips: ["Перед зверненням у підтримку оновіть застосунок до останньої версії."],
+    example: "Допоможи скласти коротке звернення в підтримку Claude англійською: у мене на iPhone не приходять сповіщення.",
+    verify: "У документації не описано. Уточніть, що саме відкривається.",
     sources: [] }
 ];
 
@@ -642,7 +875,24 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   menu: '<path d="M4 7h16M4 12h11M4 17h7"/>',
   laptop: '<rect x="4.5" y="5" width="15" height="10.5" rx="1.5"/><path d="M2.5 19h19"/>',
-  spinner: '<path d="M12 4a8 8 0 1 0 8 8"/>'
+  spinner: '<path d="M12 4a8 8 0 1 0 8 8"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  info: '<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/>',
+  profile: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="10" r="3"/><path d="M6.5 18a6 6 0 0 1 11 0"/>',
+  dollar: '<circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.5c-.5-1-1.4-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1.1 1.6 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1.2 0-2.1-.5-2.6-1.5M12 6.5v11"/>',
+  up: '<circle cx="12" cy="12" r="8.5"/><path d="M12 16.5v-9M8.5 11L12 7.5l3.5 3.5"/>',
+  chart: '<path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-6"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+  shield: '<path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><rect x="9.5" y="11" width="5" height="4" rx="1"/><path d="M10.5 11V9.5a1.5 1.5 0 0 1 3 0V11"/>',
+  clip: '<path d="M9 7l5.5 9a3 3 0 0 1-5.2 3L4.5 11a2 2 0 0 1 3.4-2l4.3 7.3"/>',
+  sliders: '<path d="M4 7h7M15 7h5M4 12h3M11 12h9M4 17h9M17 17h3M13 5v4M9 10v4M15 15v4"/>',
+  codebox: '<path d="M5 9v10h14V9"/><path d="M8 4l-2 2 2 2M16 4l2 2-2 2M13 3l-2 6"/>',
+  grid: '<rect x="4" y="11" width="9" height="9" rx="1"/><path d="M4 15.5h9M8.5 11v9"/><rect x="15" y="4" width="5" height="5" rx="1"/>',
+  toggles: '<rect x="4" y="5" width="16" height="6" rx="3"/><circle cx="16.5" cy="8" r="1.8"/><rect x="4" y="13" width="16" height="6" rx="3"/><circle cx="7.5" cy="16" r="1.8"/>',
+  voice: '<path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/>',
+  vibrate: '<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4.5 9l-1.5 1.5 1.5 1.5-1.5 1.5 1.5 1.5M19.5 9l1.5 1.5-1.5 1.5 1.5 1.5-1.5 1.5"/>',
+  palette: '<rect x="3.5" y="6" width="7" height="12" rx="1.5"/><rect x="13.5" y="6" width="7" height="12" rx="1.5" fill="currentColor"/>',
+  adduser: '<path d="M12 5v14M5 12h14"/>'
 };
 const svg = (k) => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k] || ""}</svg>`;
 
@@ -677,6 +927,7 @@ function renderPhone() {
     else if (it.id === "unread-dot") b.innerHTML = `<span class="bluedot"></span>${markHTML(it)}`;
     else if (it.id === "new-session") b.innerHTML = `${svg("plus")}<span>New session</span>${markHTML(it)}`;
     else if (b.classList.contains("icon-only") || b.classList.contains("round")) b.innerHTML = `${svg(it.icon)}${markHTML(it)}`;
+    else if (b.classList.contains("srow")) b.innerHTML = `${svg(it.icon)}<span class="lbl">${esc(it.en)}</span>${b.dataset.hint ? `<span class="hint">${esc(b.dataset.hint)}</span>` : ""}${markHTML(it)}${b.dataset.toggle ? '<span class="tog"></span>' : b.dataset.nochev || b.classList.contains("blue") ? "" : '<span class="chev">›</span>'}`;
     else b.innerHTML = `${svg(it.icon)}<span class="lbl">${esc(it.en)}</span>${markHTML(it)}`;
   });
 }
