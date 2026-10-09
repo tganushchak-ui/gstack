@@ -208,6 +208,7 @@ Each skill feeds into the next. `/office-hours` writes a design doc that `/plan-
 | `/learn` | **Memory** | Manage what gstack learned across sessions. Review, search, prune, and export project-specific patterns, pitfalls, and preferences. Learnings compound across sessions so gstack gets smarter on your codebase over time. |
 | `/make-pdf` | **Publisher** | Markdown in, publication-quality document out. Mermaid and excalidraw fences render as vector diagrams, fully offline. Images scale to the page and never truncate; wide diagrams get their own landscape page. `--to html` emits one self-contained file, `--to docx` a Word doc. |
 | `/diagram` | **Diagram Maker** | English in, editable diagram out. Emits a triplet: mermaid source, `.excalidraw` you can open and edit on excalidraw.com (hand-drawn style), and rendered SVG/PNG. Zero network. Embed the source in markdown and `/make-pdf` renders it. |
+| `/remotion` | **Video Maker** | English in, video out. Builds a [Remotion](https://www.remotion.dev) project in React/TSX, checks a still of every scene before rendering, then renders MP4/WebM/GIF. The source stays editable: tweak it or open Remotion Studio and re-render. |
 
 ### Which review should I use?
 
