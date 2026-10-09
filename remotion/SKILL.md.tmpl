@@ -1,0 +1,281 @@
+---
+name: remotion
+version: 1.0.0
+description: |
+  Make a video with Remotion: describe it in English, get a React/TSX
+  Remotion project you can keep editing plus a rendered MP4 (or WebM/GIF).
+  Frames are checked as stills before the full render, so you see the video
+  before you wait for it. Use when asked to "make a video", "render a video",
+  "animate this", "product demo video", "explainer video", "social clip",
+  or "use Remotion". (gstack)
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - AskUserQuestion
+triggers:
+  - make a video
+  - render a video
+  - remotion
+  - animate this
+  - explainer video
+  - product demo video
+---
+
+{{PREAMBLE}}
+
+# /remotion — English in, rendered video out
+
+[Remotion](https://www.remotion.dev) renders React components frame by frame
+into real video files. Every run delivers a **pair**, never just a file:
+
+| Artifact | What it's for |
+|---|---|
+| `<projdir>/` | Remotion project (TSX source). The source of truth. Edit it, re-render, keep it in git |
+| `<projdir>/out/<slug>.mp4` | the rendered video (or `.webm` / `.gif` if asked) |
+
+## Step 0 — Preflight
+
+```bash
+command -v node >/dev/null && node --version || echo "NODE_MISSING"
+command -v npx  >/dev/null || echo "NPX_MISSING"
+command -v ffprobe >/dev/null && echo "FFPROBE_OK" || echo "FFPROBE_NONE (optional, Remotion bundles its own ffmpeg)"
+```
+
+If `NODE_MISSING` or `NPX_MISSING`: stop. Remotion needs Node.js 18+ (Bun can
+run the CLI but Node is the supported path). Tell the user to install Node
+and re-run. Do not try to install Node yourself.
+
+**License note (say it once per session, one line):** Remotion is free for
+individuals and companies with up to 3 employees; larger companies need a
+Remotion company license (remotion.pro). gstack doesn't bundle Remotion, the
+project installs it from npm.
+
+## Step 1 — Pin the brief
+
+From the user's request, decide and state in one short block:
+
+- **Format:** width × height and fps. Defaults: landscape `1920x1080@30`.
+  Vertical / Reels / TikTok / Shorts → `1080x1920@30`. Square → `1080x1080@30`.
+- **Duration:** seconds → `durationInFrames = seconds × fps`. Default 10s if
+  the user gave no hint. Over 60s: confirm with AskUserQuestion first, render
+  time grows linearly.
+- **Scenes:** a numbered list, each with its frame range and what moves.
+- **Assets:** any images, audio, video, or fonts the user referenced. Local
+  files get copied into `<projdir>/public/` and loaded with `staticFile()`.
+- **Codec:** `h264` MP4 by default. `vp8` for WebM, `gif` for GIF, `prores`
+  only when the user mentions editing in Premiere/Final Cut.
+
+If the request is too vague to pick scenes (e.g. "make a video" with no
+subject), ask ONE AskUserQuestion: what the video is about and where it will
+be posted. Everything else has a default.
+
+Decide `<projdir>`: `./videos/<slug>/` when the cwd is a git repo (the user can
+commit the source), else `/tmp/gstack-videos/<slug>/`. `<slug>` is kebab-case,
+≤40 chars, from the video's subject. If `<projdir>` already holds a Remotion
+project (`package.json` lists `remotion`), reuse it: skip to Step 3 and edit.
+
+## Step 2 — Scaffold the project (once per project)
+
+Never run `npx create-video`: it is interactive and pulls a template you'd
+throw away. Write the files directly.
+
+Resolve ONE Remotion version and use it for every `remotion` / `@remotion/*`
+package. Mismatched versions are the #1 Remotion breakage ("Version mismatch"
+at render time):
+
+```bash
+npm view remotion version 2>/dev/null | tail -1
+```
+
+Remember that version as `<rv>`. If the lookup fails (offline registry), stop
+and tell the user npm is unreachable. Don't guess a version.
+
+Write these files with the Write tool:
+
+`<projdir>/package.json`:
+
+```json
+{
+  "name": "<slug>",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Main out/<slug>.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "<rv>",
+    "remotion": "<rv>",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.8",
+    "typescript": "5.8.3"
+  }
+}
+```
+
+Add `@remotion/google-fonts` (same `<rv>`) only if the video uses a Google
+font, `@remotion/transitions` (same `<rv>`) only for scene transitions.
+
+`<projdir>/tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src"]
+}
+```
+
+`<projdir>/.gitignore`:
+
+```
+node_modules/
+out/
+```
+
+`<projdir>/src/index.ts`:
+
+```ts
+import { registerRoot } from 'remotion';
+import { RemotionRoot } from './Root';
+
+registerRoot(RemotionRoot);
+```
+
+`<projdir>/src/Root.tsx`: one `<Composition id="Main" ...>` with the format and
+duration from Step 1, plus `defaultProps` for any text the user may want to
+change later (title, tagline, CTA). Props make re-renders a one-flag change.
+
+Then install:
+
+```bash
+cd <projdir> && npm install --no-audit --no-fund 2>&1 | tail -5
+```
+
+## Step 3 — Author the composition
+
+Write `<projdir>/src/Main.tsx` (split scenes into `src/scenes/*.tsx` when there
+are more than 3). Remotion rules that are not optional, every one of them
+breaks rendering or makes frames non-deterministic:
+
+- **All motion comes from `useCurrentFrame()`.** Drive every change with
+  `interpolate(frame, [in, out], [from, to], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })`
+  or `spring({ frame, fps, config: { damping: 200 } })`. Never use CSS
+  `transition`, CSS `@keyframes`, `setTimeout`, `requestAnimationFrame`, or
+  animation libraries that run on wall-clock time. Each frame is rendered
+  independently, wall-clock animation renders as a frozen or flickering mess.
+- **No `Math.random()`.** Use `random('seed-string')` from `remotion`, it is
+  stable across frames and render workers.
+- **Timeline with `<Sequence from={..} durationInFrames={..}>`.** Inside a
+  Sequence, `useCurrentFrame()` restarts at 0, write each scene as if it
+  starts at frame 0.
+- **Layout with `<AbsoluteFill>`** for full-frame layers. Size text in px
+  relative to `useVideoConfig().width`, so the same scene works vertical and
+  landscape.
+- **Media via Remotion components:** `<Img src={staticFile('logo.png')} />`,
+  `<OffthreadVideo>`, `<Audio>`. A plain `<img>` can render before it loads and
+  produce blank frames. Remote URLs work but make the render network-dependent;
+  prefer copying assets into `public/`.
+- **Fonts:** `loadFont()` from `@remotion/google-fonts/<Family>`, or
+  `@font-face` on a file in `public/`. System fonts differ between machines.
+- Keep text on screen long enough to read: ~3 words per second, minimum 1.5s
+  per text block, plus a 0.3-0.5s ease in and out.
+
+Typecheck before rendering, it's seconds and catches most mistakes:
+
+```bash
+cd <projdir> && npx tsc -p . 2>&1 | tail -20
+```
+
+## Step 4 — Check stills, then render
+
+Render one still per scene (the middle frame of each scene's range) and look
+at them BEFORE the full render. A bad layout costs seconds here and minutes in
+a full render:
+
+```bash
+cd <projdir> && npx remotion still src/index.ts Main out/check-<frame>.png --frame=<frame> 2>&1 | tail -3
+```
+
+First run downloads Chrome Headless Shell (~100MB, once per machine). If that
+download fails (`getaddrinfo` / `remotion.media` errors), reuse the Chromium
+that Playwright already installed for gstack's browse daemon:
+
+```bash
+for d in "${PLAYWRIGHT_BROWSERS_PATH:-}" "$HOME/.cache/ms-playwright" "$HOME/Library/Caches/ms-playwright"; do
+  [ -n "$d" ] && [ -d "$d" ] && find "$d" -maxdepth 4 -type f \( -name headless_shell -o -name chrome-headless-shell \) 2>/dev/null
+done | head -1
+```
+
+Pass the printed path as `--browser-executable=<path>` on every `still` /
+`render` call (remember it for the session). If it fails with
+missing shared libraries on Linux, show the error and the line from
+https://www.remotion.dev/docs/miscellaneous/linux-dependencies, then stop.
+
+Read every still with the Read tool. Check: text not clipped at the frame
+edges, nothing overlapping by accident, contrast readable, assets actually
+loaded (no blank boxes). Fix and re-check until they're right.
+
+Then the full render:
+
+```bash
+cd <projdir> && npx remotion render src/index.ts Main out/<slug>.mp4 --codec=h264 2>&1 | tail -5
+```
+
+Swap `--codec` and the extension per Step 1 (`vp8` → `.webm`, `gif` → `.gif`,
+`prores` → `.mov`). To override text without editing code:
+`--props='{"title":"New title"}'`.
+
+Verify the output exists and is the length you planned:
+
+```bash
+ls -lh <projdir>/out/<slug>.*
+command -v ffprobe >/dev/null && ffprobe -v error -show_entries format=duration -of csv=p=0 <projdir>/out/<slug>.mp4
+```
+
+If the render fails, read the error, fix the source, re-run Step 4. Don't hand
+the user a project that hasn't rendered.
+
+## Step 5 — Deliver
+
+1. Show 1-3 of the checked stills inline (Read tool) so the user sees the video
+   without opening it.
+2. Give the video path, duration, resolution, and file size.
+3. Give the two commands they'll want next:
+   - `cd <projdir> && npm run studio` opens Remotion Studio, a live preview
+     with a timeline and editable props in the browser.
+   - `cd <projdir> && npm run render` re-renders after edits.
+4. If the user wants changes: edit the TSX (or pass `--props`), re-check the
+   affected stills, re-render. The source is the single source of truth.
+
+## Rules
+
+- **Never deliver a video you haven't rendered and looked at.** If rendering
+  is impossible (Node missing, npm or the browser download blocked), say so,
+  deliver the project source, and stop.
+- **One Remotion version per project.** Adding a `@remotion/*` package later?
+  Pin it to the version already in `package.json`.
+- **Don't commit `out/` or `node_modules/`.** The scaffolded `.gitignore`
+  handles it; mention that the source in `src/` is what belongs in git.
+- For a diagram inside a video: render it with `/diagram` first and use the
+  SVG/PNG as an asset in `public/`.
+
+## Completion status
+
+- DONE — video rendered, stills shown, project path and re-render commands given.
+- DONE_WITH_CONCERNS — rendered, but something was degraded (remote assets,
+  substituted font, duration trimmed). Say what.
+- BLOCKED — Node/npm or the headless browser unavailable; the exact blocker
+  and fix surfaced.

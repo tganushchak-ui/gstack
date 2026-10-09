@@ -54,6 +54,7 @@ Conventions:
 - [/plan-tune](plan-tune/SKILL.md): Self-tuning question sensitivity + developer psychographic for gstack (v1: observational).
 - [/qa](qa/SKILL.md): Systematically QA test a web application and fix bugs found.
 - [/qa-only](qa-only/SKILL.md): Report-only QA testing.
+- [/remotion](remotion/SKILL.md): Make a video with Remotion: describe it in English, get a React/TSX Remotion project you can keep editing plus a rendered MP4 (or WebM/GIF).
 - [/retro](retro/SKILL.md): Weekly engineering retrospective.
 - [/review](review/SKILL.md): Pre-landing PR review.
 - [/scrape](scrape/SKILL.md): Pull data from a web page.
