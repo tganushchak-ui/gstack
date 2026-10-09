@@ -218,6 +218,11 @@
       "routing": "Systematically tests a web application and produces a\nstructured report with health score, screenshots, and repro steps — but never\nfixes anything. Use when asked to \"just report bugs\", \"qa report only\", or\n\"test but don't fix\". For the full test-fix-verify loop, use /qa instead.\nProactively suggest when the user wants a bug report without any code changes.",
       "voice_line": "Voice triggers (speech-to-text aliases): \"bug report\", \"just check for bugs\"."
     },
+    "remotion": {
+      "lead": "Make a video with Remotion: describe it in English, get a React/TSX Remotion project you can keep editing plus a rendered MP4 (or WebM/GIF).",
+      "routing": "Frames are checked as stills before the full render, so you see the video\nbefore you wait for it. Use when asked to \"make a video\", \"render a video\",\n\"animate this\", \"product demo video\", \"explainer video\", \"social clip\",\nor \"use Remotion\".",
+      "voice_line": null
+    },
     "retro": {
       "lead": "Weekly engineering retrospective.",
       "routing": "Analyzes commit history, work patterns,\nand code quality metrics with persistent history and trend tracking.\nTeam-aware: breaks down per-person contributions with praise and growth areas.\nUse when asked to \"weekly retro\", \"what did we ship\", or \"engineering retrospective\".\nProactively suggest at the end of a work week or sprint.",
